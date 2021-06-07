@@ -99,9 +99,9 @@ class MyComponent extends React.Component {
     * `bulletClass` - extra class for the bullet of the item
     * `bulletOnClick` - `callback({item, itemIndex, currentIndex})`
         * A function that will be called upon bullet click.
-* `infinite`: Boolean, default `true`
-  * infinite sliding
 * `lazyLoad`: Boolean, default `false`
+* `lazyLoadNext`: Boolean, default `true`
+  * if false lazy loading won't fetch next image early, only when needed
 * `showNav`: Boolean, default `true`
 * `showThumbnails`: Boolean, default `true`
 * `thumbnailPosition`: String, default `bottom`
