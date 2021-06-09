@@ -51,6 +51,7 @@ export default class ImageGallery extends React.Component {
     autoPlay: PropTypes.bool,
     lazyLoad: PropTypes.bool,
     lazyLoadNext: PropTypes.bool,
+    lazyLoadLast: PropTypes.bool,
     showIndex: PropTypes.bool,
     showBullets: PropTypes.bool,
     showThumbnails: PropTypes.bool,
@@ -104,6 +105,7 @@ export default class ImageGallery extends React.Component {
     autoPlay: false,
     lazyLoad: false,
     lazyLoadNext: true,
+    lazyLoadLast: false,
     showIndex: false,
     showBullets: false,
     showThumbnails: true,
@@ -692,6 +694,7 @@ export default class ImageGallery extends React.Component {
         break;
     }
 
+    // this makes sense just with infinite scrolling, which we currently DO NOT support
     if (this.props.items.length >= 3) {
       if (index === 0 && currentIndex === this.props.items.length - 1) {
         // set first slide as right slide if were sliding right from last slide
@@ -959,17 +962,26 @@ export default class ImageGallery extends React.Component {
     }
   };
 
-  _shouldShowItem = (alignment, index) => {
-    const showNext = this.props.lazyLoadNext && alignment;
-    const showMain = !this.props.lazyLoadNext && (alignment === Constants.CENTER);
+  _shouldRenderItem = (alignment, index) => {
+    const renderNext = this.props.lazyLoadNext && (alignment === Constants.RIGHT);
+    const renderLast = this.props.lazyLoadLast && (alignment === Constants.LEFT);
+    const renderMain = alignment === Constants.CENTER;
 
-    const showItem =
+    const renderItem =
         !this.props.lazyLoad ||
-        showNext ||
-        showMain ||
+        renderLast ||
+        renderNext ||
+        renderMain ||
         this._lazyLoaded[index];
 
-    return showItem;
+    return renderItem;
+  };
+
+  _isLazyLoaded = (index) => {
+    let { currentIndex } = this.state;
+    const lazyLoadNext = this.props.lazyLoadNext && (index === currentIndex + 1);
+    const lazyLoadLast = this.props.lazyLoadLast && (index === currentIndex - 1);
+    return lazyLoadNext || lazyLoadLast;
   };
 
   render() {
@@ -1003,15 +1015,15 @@ export default class ImageGallery extends React.Component {
       const thumbnailClass = item.thumbnailClass ?
         ` ${item.thumbnailClass}` : '';
 
-      const renderItem = item.renderItem ||
-        this.props.renderItem || this._renderItem;
+      const renderItem = item.renderItem || this.props.renderItem || this._renderItem;
 
       const renderThumbInner = item.renderThumbInner ||
         this.props.renderThumbInner || this._renderThumbInner;
 
 
-      const showItem = this._shouldShowItem(alignment, index);
-      if (showItem && this.props.lazyLoad && !this._lazyLoaded[index]) {
+      const shouldRenderItem = this._shouldRenderItem(alignment, index);
+      const isItemLazyLoaded = this._isLazyLoaded(index);
+      if (shouldRenderItem && this.props.lazyLoad && !this._lazyLoaded[index]) {
         this._lazyLoaded[index] = true;
       }
 
@@ -1028,7 +1040,7 @@ export default class ImageGallery extends React.Component {
           onMouseLeave={this.props.onMouseLeave}
           role={this.props.onClick && 'button'}
         >
-          {showItem ? renderItem(item) : <div style={{ height: '100%' }}></div>}
+          {shouldRenderItem ? renderItem(item, isItemLazyLoaded) : <div style={{ height: '100%' }}></div>}
         </div>
       );
 

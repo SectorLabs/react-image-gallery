@@ -349,13 +349,22 @@ var ImageGallery = function (_React$Component) {
       }
     };
 
-    _this._shouldShowItem = function (alignment, index) {
-      var showNext = _this.props.lazyLoadNext && alignment;
-      var showMain = !_this.props.lazyLoadNext && alignment === Constants.CENTER;
+    _this._shouldRenderItem = function (alignment, index) {
+      var renderNext = _this.props.lazyLoadNext && alignment === Constants.RIGHT;
+      var renderLast = _this.props.lazyLoadLast && alignment === Constants.LEFT;
+      var renderMain = alignment === Constants.CENTER;
 
-      var showItem = !_this.props.lazyLoad || showNext || showMain || _this._lazyLoaded[index];
+      var renderItem = !_this.props.lazyLoad || renderLast || renderNext || renderMain || _this._lazyLoaded[index];
 
-      return showItem;
+      return renderItem;
+    };
+
+    _this._isLazyLoaded = function (index) {
+      var currentIndex = _this.state.currentIndex;
+
+      var lazyLoadNext = _this.props.lazyLoadNext && index === currentIndex + 1;
+      var lazyLoadLast = _this.props.lazyLoadLast && index === currentIndex - 1;
+      return lazyLoadNext || lazyLoadLast;
     };
 
     _this.state = {
@@ -746,6 +755,7 @@ var ImageGallery = function (_React$Component) {
           break;
       }
 
+      // this makes sense just with infinite scrolling, which we currently DO NOT support
       if (this.props.items.length >= 3) {
         if (index === 0 && currentIndex === this.props.items.length - 1) {
           // set first slide as right slide if were sliding right from last slide
@@ -981,8 +991,9 @@ var ImageGallery = function (_React$Component) {
 
         var renderThumbInner = item.renderThumbInner || _this5.props.renderThumbInner || _this5._renderThumbInner;
 
-        var showItem = _this5._shouldShowItem(alignment, index);
-        if (showItem && _this5.props.lazyLoad && !_this5._lazyLoaded[index]) {
+        var shouldRenderItem = _this5._shouldRenderItem(alignment, index);
+        var isItemLazyLoaded = _this5._isLazyLoaded(index);
+        if (shouldRenderItem && _this5.props.lazyLoad && !_this5._lazyLoaded[index]) {
           _this5._lazyLoaded[index] = true;
         }
 
@@ -1000,7 +1011,7 @@ var ImageGallery = function (_React$Component) {
             onMouseLeave: _this5.props.onMouseLeave,
             role: _this5.props.onClick && 'button'
           },
-          showItem ? renderItem(item) : _react2.default.createElement('div', { style: { height: '100%' } })
+          shouldRenderItem ? renderItem(item, isItemLazyLoaded) : _react2.default.createElement('div', { style: { height: '100%' } })
         );
 
         slides.push(slide);
@@ -1179,6 +1190,7 @@ ImageGallery.propTypes = {
   autoPlay: _propTypes2.default.bool,
   lazyLoad: _propTypes2.default.bool,
   lazyLoadNext: _propTypes2.default.bool,
+  lazyLoadLast: _propTypes2.default.bool,
   showIndex: _propTypes2.default.bool,
   showBullets: _propTypes2.default.bool,
   showThumbnails: _propTypes2.default.bool,
@@ -1231,6 +1243,7 @@ ImageGallery.defaultProps = {
   autoPlay: false,
   lazyLoad: false,
   lazyLoadNext: true,
+  lazyLoadLast: false,
   showIndex: false,
   showBullets: false,
   showThumbnails: true,
