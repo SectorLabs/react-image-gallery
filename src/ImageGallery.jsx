@@ -35,6 +35,7 @@ export default class ImageGallery extends React.Component {
 
     // Used to update the throttle if slideDuration changes
     this._unthrottledSlideToIndex = this.slideToIndex;
+    this._requestedAnimationFrame = null;
     this.slideToIndex = throttle(this._unthrottledSlideToIndex,
                                  props.slideDuration,
                                 {trailing: false});
@@ -365,6 +366,10 @@ export default class ImageGallery extends React.Component {
         nextIndex = 0;
       }
 
+      // We cancel the requested drag animation in order to
+      // allow the gallery to slide to the next element
+      this._cancelRequestedAnimationFrame();
+
       this.setState({
         previousIndex: currentIndex,
         currentIndex: nextIndex,
@@ -375,6 +380,18 @@ export default class ImageGallery extends React.Component {
         }
       }, this._onSliding);
     }
+  };
+
+  _cancelRequestedAnimationFrame() {
+    if (this._requestedAnimationFrame) {
+      cancelAnimationFrame(this._requestedAnimationFrame);
+    }
+  }
+
+  _withAnimationFrame = (callback) => {
+    this._cancelRequestedAnimationFrame();
+
+    this._requestedAnimationFrame = requestAnimationFrame(callback);
   };
 
   _onSliding = () => {
@@ -580,27 +597,30 @@ export default class ImageGallery extends React.Component {
   _handleSwiping = (e, deltaX, deltaY, delta) => {
     const { galleryWidth, isTransitioning, scrollingUpDown } = this.state;
     const { swipingTransitionDuration } = this.props;
-    this._setScrollDirection(deltaX, deltaY);
-    if (!isTransitioning && !scrollingUpDown) {
-      const side = deltaX < 0 ? 1 : -1;
 
-      let offsetPercentage = (delta / galleryWidth * 100);
-      if (Math.abs(offsetPercentage) >= 100) {
-        offsetPercentage = 100;
+    this._withAnimationFrame(() => {
+      this._setScrollDirection(deltaX, deltaY);
+      if (!isTransitioning && !scrollingUpDown) {
+        const side = deltaX < 0 ? 1 : -1;
+
+        let offsetPercentage = (delta / galleryWidth * 100);
+        if (Math.abs(offsetPercentage) >= 100) {
+          offsetPercentage = 100;
+        }
+
+        const swipingTransition = {
+          transition: `all ${swipingTransitionDuration}ms ease`
+        };
+
+        this.setState({
+          offsetPercentage: side * offsetPercentage,
+          style: swipingTransition,
+        });
+      } else {
+        // don't move the slide
+        this.setState({ offsetPercentage: 0 });
       }
-
-      const swipingTransition = {
-        transition: `all ${swipingTransitionDuration}ms ease`
-      };
-
-      this.setState({
-        offsetPercentage: side * offsetPercentage,
-        style: swipingTransition,
-      });
-    } else {
-      // don't move the slide
-      this.setState({ offsetPercentage: 0 });
-    }
+    });
   };
 
   _canNavigate() {
