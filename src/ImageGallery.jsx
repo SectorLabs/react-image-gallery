@@ -382,7 +382,7 @@ export default class ImageGallery extends React.Component {
     }
   };
 
-  _cancelRequestedAnimationFrame() {
+  _cancelRequestedAnimationFrame = () => {
     if (this._requestedAnimationFrame) {
       cancelAnimationFrame(this._requestedAnimationFrame);
     }
