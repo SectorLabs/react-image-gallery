@@ -80,6 +80,10 @@ var ImageGallery = function (_React$Component) {
           nextIndex = 0;
         }
 
+        // We cancel the requested drag animation in order to
+        // allow the gallery to slide to the next element
+        _this._cancelRequestedAnimationFrame();
+
         _this.setState({
           previousIndex: currentIndex,
           currentIndex: nextIndex,
@@ -90,6 +94,18 @@ var ImageGallery = function (_React$Component) {
           }
         }, _this._onSliding);
       }
+    };
+
+    _this._cancelRequestedAnimationFrame = function () {
+      if (_this._requestedAnimationFrame) {
+        cancelAnimationFrame(_this._requestedAnimationFrame);
+      }
+    };
+
+    _this._withAnimationFrame = function (callback) {
+      _this._cancelRequestedAnimationFrame();
+
+      _this._requestedAnimationFrame = requestAnimationFrame(callback);
     };
 
     _this._onSliding = function () {
@@ -242,27 +258,30 @@ var ImageGallery = function (_React$Component) {
           scrollingUpDown = _this$state3.scrollingUpDown;
       var swipingTransitionDuration = _this.props.swipingTransitionDuration;
 
-      _this._setScrollDirection(deltaX, deltaY);
-      if (!isTransitioning && !scrollingUpDown) {
-        var side = deltaX < 0 ? 1 : -1;
 
-        var offsetPercentage = delta / galleryWidth * 100;
-        if (Math.abs(offsetPercentage) >= 100) {
-          offsetPercentage = 100;
+      _this._withAnimationFrame(function () {
+        _this._setScrollDirection(deltaX, deltaY);
+        if (!isTransitioning && !scrollingUpDown) {
+          var side = deltaX < 0 ? 1 : -1;
+
+          var offsetPercentage = delta / galleryWidth * 100;
+          if (Math.abs(offsetPercentage) >= 100) {
+            offsetPercentage = 100;
+          }
+
+          var swipingTransition = {
+            transition: 'all ' + swipingTransitionDuration + 'ms ease'
+          };
+
+          _this.setState({
+            offsetPercentage: side * offsetPercentage,
+            style: swipingTransition
+          });
+        } else {
+          // don't move the slide
+          _this.setState({ offsetPercentage: 0 });
         }
-
-        var swipingTransition = {
-          transition: 'all ' + swipingTransitionDuration + 'ms ease'
-        };
-
-        _this.setState({
-          offsetPercentage: side * offsetPercentage,
-          style: swipingTransition
-        });
-      } else {
-        // don't move the slide
-        _this.setState({ offsetPercentage: 0 });
-      }
+      });
     };
 
     _this._slideLeft = function (event) {
@@ -371,6 +390,7 @@ var ImageGallery = function (_React$Component) {
 
     // Used to update the throttle if slideDuration changes
     _this._unthrottledSlideToIndex = _this.slideToIndex;
+    _this._requestedAnimationFrame = null;
     _this.slideToIndex = (0, _lodash2.default)(_this._unthrottledSlideToIndex, props.slideDuration, { trailing: false });
 
     if (props.lazyLoad) {
