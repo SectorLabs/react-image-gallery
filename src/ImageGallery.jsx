@@ -172,7 +172,7 @@ export default class ImageGallery extends React.Component {
     },
   };
 
-  componentWillReceiveProps(nextProps) {
+  UNSAFE_componentWillReceiveProps(nextProps) {
     if (this.props.disableArrowKeys !== nextProps.disableArrowKeys) {
       if (nextProps.disableArrowKeys) {
         window.removeEventListener('keydown', this._handleKeyDown);

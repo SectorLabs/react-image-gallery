@@ -400,8 +400,8 @@ var ImageGallery = function (_React$Component) {
   }
 
   _createClass(ImageGallery, [{
-    key: 'componentWillReceiveProps',
-    value: function componentWillReceiveProps(nextProps) {
+    key: 'UNSAFE_componentWillReceiveProps',
+    value: function UNSAFE_componentWillReceiveProps(nextProps) {
       if (this.props.disableArrowKeys !== nextProps.disableArrowKeys) {
         if (nextProps.disableArrowKeys) {
           window.removeEventListener('keydown', this._handleKeyDown);
