@@ -6,8 +6,8 @@
   "scripts": {
     "verify": "eslint --ext .js,.jsx src",
     "build": "npm run build:js && npm run build:css",
-    "build:js": "babel src/ImageGallery.jsx --out-file build/image-gallery.js --plugins transform-object-assign --presets es2015,react,stage-0",
-    "build:css": "sass styles/scss/image-gallery.scss styles/css/image-gallery.css && sass styles/scss/image-gallery-no-icon.scss styles/css/image-gallery-no-icon.css",
+    "build:js": "mkdir -p build && babel src/ImageGallery.jsx --out-file build/image-gallery.js --plugins transform-object-assign --presets es2015,react,stage-0",
+    "build:css": "mkdir -p styles/css && sass styles/scss/image-gallery.scss styles/css/image-gallery.css && sass styles/scss/image-gallery-no-icon.scss styles/css/image-gallery-no-icon.css",
     "lint": "eslint --ext .js,.jsx src"
   },
   "repository": {
