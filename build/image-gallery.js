@@ -12,7 +12,7 @@ var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
 
-var _reactSwipeable = require('react-swipeable');
+var _reactSwipeable = require('@sector-labs/react-swipeable');
 
 var _reactSwipeable2 = _interopRequireDefault(_reactSwipeable);
 
